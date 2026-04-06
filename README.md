@@ -150,8 +150,8 @@ NumPy
 
 ## Installation
 
-git clone https://github.com/sohanpanda104/RL_Vision_based_Interception.git
-cd RL_Vision_based_Interception
+git clone https://github.com/sohanpanda104/RL_Vision_based_Interception.git /
+cd RL_Vision_based_Interception /
 pip install -r requirements.txt
 
 ## Future Work
