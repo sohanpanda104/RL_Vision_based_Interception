@@ -140,18 +140,6 @@ We evaluate performance using:
 - **Fixed Camera**: expected to perform better in early stages due to stable global observation, but may need memory-based policies like LSTMs to handle occlusions.
 - **Wrist Camera**: expected to support more active vision behavior, where the robot moves to improve visibility inside the tunnel.
 
-## Repository Structure
-
-RL_Vision_based_Interception/
-├── README.md
-├── requirements.txt
-├── src/
-├── envs/
-├── models/
-├── scripts/
-├── assets/
-└── results/
-
 ## Prerequisites
 
 Python 3.10+
