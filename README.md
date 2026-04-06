@@ -142,10 +142,10 @@ We evaluate performance using:
 
 ## Prerequisites
 
-Python 3.10+
-PyTorch
-Gymnasium / Isaac Sim / MuJoCo / or your chosen robotics simulator
-OpenCV
+Python 3.10+  
+PyTorch  
+Gymnasium / Isaac Sim / MuJoCo / or your chosen robotics simulator  
+OpenCV  
 NumPy
 
 ## Installation
@@ -156,10 +156,10 @@ pip install -r requirements.txt
 
 ## Future Work
 
-Recurrent policies for long occlusions
-Better sim-to-real transfer
-Improved active vision strategies
-Comparison with classical control baselines
+Recurrent policies for long occlusions  
+Better sim-to-real transfer  
+Improved active vision strategies  
+Comparison with classical control baselines  
 Multi-object interception scenarios
 
 ## Acknowledgements
