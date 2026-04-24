@@ -1,4 +1,4 @@
-# Precision Pick-and-Place
+# Precision Pick-and-Place: Learning Robotic Control through RL
 
 A reinforcement learning project for **vision-based dynamic interception** with a 7-DOF robotic arm.  
 The agent learns to visually track, predict, and grasp a moving object on a conveyor belt under progressively harder conditions, including domain randomization and partial observability.
