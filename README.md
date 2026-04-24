@@ -1,167 +1,162 @@
 # Precision Pick-and-Place: Learning Robotic Control through RL
 
-A reinforcement learning project for **vision-based dynamic interception** with a 7-DOF robotic arm.  
-The agent learns to visually track, predict, and grasp a moving object on a conveyor belt under progressively harder conditions, including domain randomization and partial observability.
+A reinforcement learning project for **dynamic interception under partial observability** with a 7-DOF robotic arm.
+The agent learns to track, predict, and grasp a moving object on a conveyor belt, even when the object becomes temporarily unobservable.
 
 ## Project Overview
 
-Traditional robotic control often assumes static objects and perfect state information. In real industrial settings, objects move, physics can vary, and visual input can be partially blocked. This project explores how **visual RL** can solve interception when the robot must act from raw camera observations instead of exact object coordinates.
+Traditional robotic control assumes full state observability and static environments. In real-world scenarios, however, objects move, system dynamics vary, and critical information may be temporarily unavailable.
 
-The environment is designed around:
-- a **7-DOF robot arm**
-- a **moving target on a conveyor belt**
-- **two camera configurations**: eye-to-hand and eye-in-hand
-- a **curriculum of increasing difficulty**
+This project explores how **reinforcement learning (RL)** can enable a robotic arm to perform interception and grasping when the object is **partially observable**, requiring the agent to rely on **temporal reasoning and prediction** rather than direct perception.
+
+The environment includes:
+
+- a **7-DOF robotic arm**
+- a **moving object on a conveyor belt**
+- an **occlusion tunnel** that temporarily hides the object
+- a **progressive curriculum of increasing difficulty**
 - **continuous control** for arm motion and **discrete control** for gripper action
 
 ## Motivation
 
-This project studies whether RL can learn robust interception and grasping behavior when:
-- the object’s motion is only partially observable,
-- object mass and belt speed can vary,
-- the target may disappear temporarily behind an occlusion tunnel,
-- classical kinematic solvers become unreliable.
+In dynamic manipulation tasks, robots often lose access to complete state information due to occlusions or sensor limitations. Classical control methods struggle in such settings because they rely on continuous, accurate observations.
 
-The goal is to train policies that learn **predictive “pixels-to-torques” control** directly from visual input and proprioception.
+This project investigates whether RL can learn robust interception policies when:
+
+- the object becomes temporarily unobservable,
+- motion must be inferred over time,
+- system dynamics such as speed and mass vary,
+- explicit motion models are unavailable or unreliable.
+
+The goal is to develop agents capable of **predictive control under uncertainty**, using internal memory to compensate for missing information.
 
 ## Problem Statement
 
 Given:
-- RGB-D observations from a fixed or wrist-mounted camera,
-- robot joint angles and joint velocities,
-- gripper state,
 
-the agent must:
+- robot joint angles and velocities,
+- gripper state,
+- object state **only when visible**,
+
+The agent must:
 1. track a moving object,
-2. predict its future position,
-3. intercept it at the right time,
-4. grasp it accurately.
+2. infer its motion during occlusion,
+3. predict its future position,
+4. intercept it at the correct time,
+5. execute a successful grasp.
 
 ## Curriculum Design
 
-The project follows a progressive curriculum:
+Training follows a progressive curriculum:
 
 ### 1. Baseline
-- Constant linear velocity interception
-- Simplest setting for initial policy learning
-
+* Constant object velocity
+* Fully observable motion
+* Simplifies initial learning of interception behavior
+ 
 ### 2. Domain Randomization
-- Random variations in belt speed
-- Random variations in object mass
-- Improves robustness to changing dynamics
+* Random belt speeds
+* Random object mass
+* Encourages robustness to dynamic variations###
 
 ### 3. Partial Observability
-- An occlusion tunnel temporarily hides the object
-- Tests whether the agent can maintain memory and prediction without continuous visual tracking
+* An occlusion tunnel hides the object temporarily
+* Forces the agent to rely on memory and prediction
 
-## Camera Setups
-
-### Eye-to-Hand
-A fixed global camera view:
-- gives a broad overview of the scene
-- can suffer from arm occlusion
-
-### Eye-in-Hand
-A wrist-mounted camera:
-- provides a local, close-up view
-- can suffer from motion blur and limited field of view
-
-## Observation Space
-
+# Observation Space
 The agent observes:
 
-### Visual State
-- RGB-D image input from the fixed or wrist camera
+## Proprioceptive State
 
-### Proprioceptive State
 - 7-DOF joint angles
 - joint velocities
 - gripper open/close status
 
-The agent is **not** given the exact 3D coordinates of the block.
+## Object State (Partial)
 
-## Action Space
+- object position and/or velocity **only when visible**
+- no information during occlusion
+
+This creates a **Partially Observable Markov Decision Process (POMDP)**.
+
+# Action Space
 
 The policy outputs:
 
-### Continuous Control
-- 3D Cartesian velocity commands:
-  - `Delta x`
-  - `Delta y`
-  - `Delta z`
+## Continuous Control
 
-### Discrete Control
+- Cartesian velocity commands:
+  - Δx
+  - Δy
+  - Δz
+
+## Discrete Control
+
 - Gripper action:
   - `0 = Open`
   - `1 = Close`
 
-## Why Reinforcement Learning?
+# Why Reinforcement Learning?
 
-Classical solvers rely on accurate physics and explicit motion models. That works well in ideal conditions, but becomes unreliable when:
-- the object is occluded,
-- the object velocity changes unexpectedly,
-- friction or mass varies,
-- the robot must infer motion from raw pixels.
+Classical control methods depend on accurate state estimation and predefined motion models. These assumptions break down when observations are missing or unreliable.
 
-RL, especially with memory-based methods such as **frame stacking** or **LSTMs**, can learn predictive behavior directly from experience.
+RL provides a framework for learning:
+- **predictive behavior** from experience,
+- **implicit motion models** without explicit equations,
+- **memory-based strategies** for handling occlusion.
 
-## Methodology
+Recurrent policies such as LSTMs allow the agent to maintain an internal representation of the object’s motion when it is no longer visible.
 
-We plan to train separate visual RL agents for both camera configurations using methods such as:
-- **PPO**
-- **CNN-based policies**
-- recurrent memory when needed for occlusion handling
+# Methodology
+We train agents using:
+- **Proximal Policy Optimization (PPO)**
+- **MLP-based policies** for fully observable settings
+- **Recurrent policies (PPO + LSTM/GRU)** for partial observability.
+Comparisons will be made between:
+- feedforward vs recurrent policies,
+- performance across curriculum stages.
 
-Training and testing will be done across the three curriculum stages to compare robustness and adaptability.
+# Evaluation Metrics 
+Performance is evaluated using:
+| Metric | Description |
+| --- | --- |
+| Interception Success Rate (ISR) | Percentage of successful interceptions |
+| Grasp Error (Positional) | Distance between gripper center and object at grasp |
+| Time-to-Intercept (TTI) | Time taken to reach interception point |
+| Path Efficiency Ratio | Ratio of executed trajectory length to optimal trajectory (ideal ≈ 1.0) |
+| Velocity Matching Error | Difference between object and end-effector velocity at contact |
+ 
+# Expected Outcomes 
+* **Feedforward policies** perform well in fully observable settings but degrade under occlusion.
+* **Recurrent policies** learn to:
+  - maintain internal state representations,
+  - predict object motion during occlusion,
+  - improve interception success under uncertainty.
+ 
+# Prerequisites
 
-## Evaluation Metrics
+- Python 3.10+
+- PyTorch
+- Gymnasium / Isaac Sim / MuJoCo (or equivalent simulator)
+- NumPy
 
-We evaluate performance using:
+# Installation
 
-- **Interception Success Rate (ISR)**  
-  Measures how often the robot successfully intercepts the object.
-
-- **Grasp Error (Positional)**  
-  Measures how centered the grasp is. Lower is better.
-
-- **Time-to-Intercept (TTI)**  
-  Measures reaction speed. Lower is better.
-
-- **Path Efficiency Ratio**  
-  Compares the actual trajectory with the optimal one.  
-  Ideal is close to `1.0`.
-
-- **Velocity Matching Error**  
-  Measures how well the robot matches the object’s velocity at contact.  
-  Lower means smoother interception.
-
-## Expected Outcomes
-
-- **Fixed Camera**: expected to perform better in early stages due to stable global observation, but may need memory-based policies like LSTMs to handle occlusions.
-- **Wrist Camera**: expected to support more active vision behavior, where the robot moves to improve visibility inside the tunnel.
-
-## Prerequisites
-
-Python 3.10+  
-PyTorch  
-Gymnasium / Isaac Sim / MuJoCo / or your chosen robotics simulator  
-OpenCV  
-NumPy
-
-## Installation
-
-git clone https://github.com/sohanpanda104/RL_Vision_based_Interception.git  
-cd RL_Vision_based_Interception  
+```bash
+git clone https://github.com/sohanpanda104/RL_Vision_based_Interception.git
+cd RL_Vision_based_Interception
 pip install -r requirements.txt
+```
 
-## Future Work
+# Future Work
 
-Recurrent policies for long occlusions  
-Better sim-to-real transfer  
-Improved active vision strategies  
-Comparison with classical control baselines  
-Multi-object interception scenarios
+- Longer and more complex occlusion scenarios
+- Improved sim-to-real transfer
+- Learned state estimation (belief models)
+- Multi-object interception
+- Comparison with classical state estimation + control pipelines
 
-## Acknowledgements
+# Acknowledgements
 
-This project explores vision-based interception in robotic RL, with a focus on dynamic objects, partial observability, and robust control under uncertainty.
+This project explores reinforcement learning for **dynamic interception under partial observability**, focusing on prediction, memory, and robust control in uncertain environments.
+ 
