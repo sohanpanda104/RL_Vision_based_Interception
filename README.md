@@ -112,6 +112,7 @@ We train agents using:
 - **Proximal Policy Optimization (PPO)**
 - **MLP-based policies** for fully observable settings
 - **Recurrent policies (PPO + LSTM/GRU)** for partial observability. 
+
 Comparisons will be made between:
 - feedforward vs recurrent policies,
 - performance across curriculum stages.
