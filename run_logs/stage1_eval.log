@@ -1,0 +1,69 @@
+
+Evaluating and Recording 3D Pick & Place...
+argv[0]=--background_color_red=0.8745098114013672
+argv[1]=--background_color_green=0.21176470816135406
+argv[2]=--background_color_blue=0.1764705926179886
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+SUCCESS - Block lifted to target!
+Saving video to /workspace/stage1/models_3d_s2/videos/panda_pick_and_place-step-0-to-step-1250.mp4
+MoviePy - Building video /workspace/stage1/models_3d_s2/videos/panda_pick_and_place-step-0-to-step-1250.mp4.
+MoviePy - Writing video /workspace/stage1/models_3d_s2/videos/panda_pick_and_place-step-0-to-step-1250.mp4
+
+MoviePy - Done !
+MoviePy - video ready /workspace/stage1/models_3d_s2/videos/panda_pick_and_place-step-0-to-step-1250.mp4
+
+[SAVED] Video successfully saved to: models_3d_s2/videos/

@@ -1,0 +1,15 @@
+
+Evaluating Stage 2 (Domain Randomization)...
+argv[0]=--background_color_red=0.8745098114013672
+argv[1]=--background_color_green=0.21176470816135406
+argv[2]=--background_color_blue=0.1764705926179886
+Saving video to /workspace/stage2/models_3d_s2/videos/panda_s2_randomized-step-0-to-step-250.mp4
+MoviePy - Building video /workspace/stage2/models_3d_s2/videos/panda_s2_randomized-step-0-to-step-250.mp4.
+MoviePy - Writing video /workspace/stage2/models_3d_s2/videos/panda_s2_randomized-step-0-to-step-250.mp4
+
+MoviePy - Done !
+MoviePy - video ready /workspace/stage2/models_3d_s2/videos/panda_s2_randomized-step-0-to-step-250.mp4
+  Episode  1/1 | ✗ MISSED | speed=0.0107, mass=1.12kg
+
+Final Success Rate: 0/1 (0.0%)
+[SAVED] Video saved to: models_3d_s2/videos/

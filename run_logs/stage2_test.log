@@ -1,0 +1,14 @@
+argv[0]=--background_color_red=0.8745098114013672
+argv[1]=--background_color_green=0.21176470816135406
+argv[2]=--background_color_blue=0.1764705926179886
+[INFO] Using model: models_3d_s2/panda_s2_final.zip
+Saving video to /workspace/stage2/models_3d_s2/test_videos/stage2_test-step-0-to-step-250.mp4
+MoviePy - Building video /workspace/stage2/models_3d_s2/test_videos/stage2_test-step-0-to-step-250.mp4.
+MoviePy - Writing video /workspace/stage2/models_3d_s2/test_videos/stage2_test-step-0-to-step-250.mp4
+
+MoviePy - Done !
+MoviePy - video ready /workspace/stage2/models_3d_s2/test_videos/stage2_test-step-0-to-step-250.mp4
+Episode  1/1 | MISS | speed=0.0083 | mass=0.66kg
+
+Done. Success rate: 0/1 (0.0%)
+Video saved under: models_3d_s2/test_videos

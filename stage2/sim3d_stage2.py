@@ -306,7 +306,13 @@ def make_env(rank, seed=0):
 # TRAINING
 # ═══════════════════════════════════════════════════════════════
 
-def train(total_timesteps=5_000_000, n_envs=8):
+def train(
+    total_timesteps=5_000_000,
+    n_envs=8,
+    eval_freq=25_000,
+    eval_episodes=30,
+    progress_bar=True,
+):
     print("\n" + "=" * 60)
     print("  STAGE 2: Domain Randomization Training")
     print("  Speed: [{:.3f}, {:.3f}]  Mass: [{:.1f}, {:.1f}]".format(
@@ -337,8 +343,8 @@ def train(total_timesteps=5_000_000, n_envs=8):
         eval_env,
         best_model_save_path=os.path.join(MODEL_DIR, "best"),
         log_path=EVAL_DIR,
-        eval_freq=max(1, 25_000 // n_envs),
-        n_eval_episodes=30,       # 30 episodes = good sample across randomization
+        eval_freq=max(1, eval_freq // n_envs),
+        n_eval_episodes=eval_episodes,
         deterministic=True,
         render=False,
         verbose=1,
@@ -378,7 +384,7 @@ def train(total_timesteps=5_000_000, n_envs=8):
     model.learn(
         total_timesteps=total_timesteps,
         callback=[ckpt_cb, eval_cb, plot_cb],
-        progress_bar=True,
+        progress_bar=progress_bar,
     )
 
     model.save(os.path.join(MODEL_DIR, "panda_s2_final"))
@@ -473,6 +479,23 @@ def build_arg_parser():
         default=8,
         help="Number of parallel environments to launch during training.",
     )
+    train_parser.add_argument(
+        "--eval-freq",
+        type=int,
+        default=25_000,
+        help="Evaluate every N total timesteps. Lower this for automated smoke runs.",
+    )
+    train_parser.add_argument(
+        "--eval-episodes",
+        type=int,
+        default=30,
+        help="Number of episodes per evaluation round.",
+    )
+    train_parser.add_argument(
+        "--no-progress-bar",
+        action="store_true",
+        help="Disable the tqdm/rich progress bar for non-interactive runs.",
+    )
 
     eval_parser = subparsers.add_parser("eval", help="Evaluate a trained model.")
     eval_parser.add_argument(
@@ -509,4 +532,7 @@ if __name__ == "__main__":
         train(
             total_timesteps=getattr(args, "timesteps", 5_000_000),
             n_envs=getattr(args, "n_envs", 8),
+            eval_freq=getattr(args, "eval_freq", 25_000),
+            eval_episodes=getattr(args, "eval_episodes", 30),
+            progress_bar=not getattr(args, "no_progress_bar", False),
         )

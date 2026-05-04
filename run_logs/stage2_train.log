@@ -1,0 +1,49 @@
+
+============================================================
+  STAGE 2: Domain Randomization Training
+  Speed: [0.004, 0.015]  Mass: [0.3, 1.2]
+============================================================
+argv[0]=--background_color_red=0.8745098114013672
+argv[1]=--background_color_green=0.21176470816135406
+argv[2]=--background_color_blue=0.1764705926179886
+argv[0]=--background_color_red=0.8745098114013672
+argv[1]=--background_color_green=0.21176470816135406
+argv[2]=--background_color_blue=0.1764705926179886
+[FRESH START] No Stage 1 weights found, training from scratch
+Using cpu device
+Eval num_timesteps=1024, episode_reward=-2095.76 +/- 0.00
+Episode length: 250.00 +/- 0.00
+Success rate: 0.00%
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 250      |
+|    mean_reward     | -2.1e+03 |
+|    success_rate    | 0        |
+| time/              |          |
+|    total_timesteps | 1024     |
+---------------------------------
+New best mean reward!
+Eval num_timesteps=2048, episode_reward=-1301.23 +/- 0.00
+Episode length: 250.00 +/- 0.00
+Success rate: 0.00%
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 250      |
+|    mean_reward     | -1.3e+03 |
+|    success_rate    | 0        |
+| time/              |          |
+|    total_timesteps | 2048     |
+---------------------------------
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    success_rate    | 0        |
+| time/              |          |
+|    fps             | 139      |
+|    iterations      | 1        |
+|    time_elapsed    | 14       |
+|    total_timesteps | 2048     |
+---------------------------------
+
+Training complete! Model saved to models_3d_s2/
+Success rate plot saved to models_3d_s2/success_rate_plot.png
