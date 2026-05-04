@@ -2,83 +2,113 @@
 set -eu
 set -o pipefail 2>/dev/null || true
 
+# Bootstrap: if essential project folders are missing, clone the repository and
+# re-exec the cloned `run.sh`. This lets users run a single bootstrap script
+# in an empty directory.
+REPO_URL="https://github.com/sohanpanda104/RL_Vision_based_Interception.git"
+if [ ! -d "stage2" ] || [ ! -d "stage1" ]; then
+  if [ "${NO_AUTO_CLONE:-0}" = "1" ]; then
+    echo "Missing project files and NO_AUTO_CLONE=1 set; please clone the repo manually."
+    exit 1
+  fi
+  if ! command -v git >/dev/null 2>&1; then
+    echo "git is required to bootstrap the repository. Install git or clone the repo manually:"
+    echo "  git clone ${REPO_URL} ."
+    exit 1
+  fi
+  TMP_CLONE_DIR="$(mktemp -d /tmp/rlproj.XXXX)"
+  echo "Bootstrapping: cloning repository into ${TMP_CLONE_DIR}..."
+  if ! git clone --depth=1 "${REPO_URL}" "${TMP_CLONE_DIR}"; then
+    echo "git clone failed. Aborting."
+    rm -rf "${TMP_CLONE_DIR}" || true
+    exit 1
+  fi
+  echo "Running cloned run.sh from ${TMP_CLONE_DIR}"
+  exec bash "${TMP_CLONE_DIR}/run.sh" "$@"
+fi
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 if command -v apt-get >/dev/null 2>&1; then
-  export DEBIAN_FRONTEND=noninteractive
-  if [ "$(id -u)" -ne 0 ]; then
-    if command -v sudo >/dev/null 2>&1; then
-      APT_GET=(sudo -E apt-get)
-      SED=(sudo sed)
-    else
-      echo "apt-get requires root privileges. Re-run this script with sudo, or install system dependencies manually."
-      exit 1
-    fi
+  if [ "${SKIP_SYSTEM_DEPS:-0}" = "1" ]; then
+    echo "Skipping system package installation because SKIP_SYSTEM_DEPS=1"
   else
-    APT_GET=(apt-get)
-    SED=(sed)
-  fi
-
-  APT_OPTS=(
-    -o Acquire::Retries=5
-    -o Acquire::ForceIPv4=true
-    -o Acquire::http::No-Cache=true
-    -o Acquire::http::Pipeline-Depth=0
-  )
-
-  retry_with_mirror_fallback() {
-    local mirror_attempt=1
-    local max_attempts=3
-    
-    while [ $mirror_attempt -le $max_attempts ]; do
-      echo "Mirror attempt $mirror_attempt/$max_attempts..."
-      
-      # Try to run the command (apt-get install)
-      if "$@" 2>&1 | tee /tmp/apt_output.log; then
-        return 0
+    echo "Installing system packages (set SKIP_SYSTEM_DEPS=1 to skip on repeat runs)..."
+    export DEBIAN_FRONTEND=noninteractive
+    if [ "$(id -u)" -ne 0 ]; then
+      if command -v sudo >/dev/null 2>&1; then
+        APT_GET=(sudo -E apt-get)
+        SED=(sudo sed)
+      else
+        echo "apt-get requires root privileges. Re-run this script with sudo, or install system dependencies manually."
+        exit 1
       fi
-      
-      # Check if libxcb-present0 is the issue
-      if grep -q "libxcb-present0" /tmp/apt_output.log 2>/dev/null || grep -q "400  Bad Request" /tmp/apt_output.log 2>/dev/null; then
-        echo "Detected libxcb-present0 mirror issue. Switching mirrors..."
-        
-        if [ $mirror_attempt -eq 1 ]; then
-          echo "Trying deb.debian.org mirror..."
-          "${SED[@]}" -i 's|http://archive.ubuntu.com/ubuntu|http://deb.debian.org/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
-        elif [ $mirror_attempt -eq 2 ]; then
-          echo "Trying security.ubuntu.com mirror..."
-          "${SED[@]}" -i 's|http://deb.debian.org/ubuntu|http://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+    else
+      APT_GET=(apt-get)
+      SED=(sed)
+    fi
+
+    APT_OPTS=(
+      -o Acquire::Retries=5
+      -o Acquire::ForceIPv4=true
+      -o Acquire::http::No-Cache=true
+      -o Acquire::http::Pipeline-Depth=0
+    )
+
+    retry_with_mirror_fallback() {
+      local mirror_attempt=1
+      local max_attempts=3
+
+      while [ $mirror_attempt -le $max_attempts ]; do
+        echo "Mirror attempt $mirror_attempt/$max_attempts..."
+
+        # Try to run the command (apt-get install)
+        if "$@" 2>&1 | tee /tmp/apt_output.log; then
+          return 0
         fi
-        
-        "${APT_GET[@]}" clean >/dev/null 2>&1 || true
-        "${APT_GET[@]}" "${APT_OPTS[@]}" update >/dev/null 2>&1 || true
-      fi
-      
-      mirror_attempt=$((mirror_attempt + 1))
-      
-      if [ $mirror_attempt -le $max_attempts ]; then
-        echo "Command failed. Switching strategy in 10 seconds..."
-        sleep 10
-      fi
-    done
-    
-    return 1
-  }
 
-  retry_with_mirror_fallback "${APT_GET[@]}" "${APT_OPTS[@]}" update
-  retry_with_mirror_fallback "${APT_GET[@]}" "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
-    ca-certificates \
-    libegl1 \
-    libgl1 \
-    libglib2.0-0 \
-    libosmesa6 \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
-    python3 \
-    python3-pip \
-    python3-venv
+        # Check if libxcb-present0 is the issue
+        if grep -q "libxcb-present0" /tmp/apt_output.log 2>/dev/null || grep -q "400  Bad Request" /tmp/apt_output.log 2>/dev/null; then
+          echo "Detected libxcb-present0 mirror issue. Switching mirrors..."
+
+          if [ $mirror_attempt -eq 1 ]; then
+            echo "Trying deb.debian.org mirror..."
+            "${SED[@]}" -i 's|http://archive.ubuntu.com/ubuntu|http://deb.debian.org/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+          elif [ $mirror_attempt -eq 2 ]; then
+            echo "Trying security.ubuntu.com mirror..."
+            "${SED[@]}" -i 's|http://deb.debian.org/ubuntu|http://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+          fi
+
+          "${APT_GET[@]}" clean >/dev/null 2>&1 || true
+          "${APT_GET[@]}" "${APT_OPTS[@]}" update >/dev/null 2>&1 || true
+        fi
+
+        mirror_attempt=$((mirror_attempt + 1))
+
+        if [ $mirror_attempt -le $max_attempts ]; then
+          echo "Command failed. Switching strategy in 10 seconds..."
+          sleep 10
+        fi
+      done
+
+      return 1
+    }
+
+    retry_with_mirror_fallback "${APT_GET[@]}" "${APT_OPTS[@]}" update
+    retry_with_mirror_fallback "${APT_GET[@]}" "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
+      ca-certificates \
+      libegl1 \
+      libgl1 \
+      libglib2.0-0 \
+      libosmesa6 \
+      libsm6 \
+      libxext6 \
+      libxrender1 \
+      python3 \
+      python3-pip \
+      python3-venv
+  fi
 fi
 
 if ! command -v python3 >/dev/null 2>&1; then
@@ -108,7 +138,7 @@ export PIP_RETRIES="${PIP_RETRIES:-10}"
 
 python -m pip install --upgrade --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" pip setuptools wheel
 python -m pip install --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" --index-url https://download.pytorch.org/whl/cpu "torch==2.5.1+cpu"
-python -m pip install --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" -r requirements.txt
+python -m pip install --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" -r numpy>=1.26,<3 matplotlib>=3.7,<4 gymnasium>=0.29,<1.3 pybullet==3.2.7 panda-gym==3.0.7 stable-baselines3[extra]>=2.7,<3 moviepy>=1.0,<3 imageio[ffmpeg]>=2.31
 
 export PYTHONUNBUFFERED=1
 export MPLBACKEND=Agg
