@@ -7,6 +7,19 @@ cd "$ROOT_DIR"
 
 if command -v apt-get >/dev/null 2>&1; then
   export DEBIAN_FRONTEND=noninteractive
+  if [ "$(id -u)" -ne 0 ]; then
+    if command -v sudo >/dev/null 2>&1; then
+      APT_GET=(sudo -E apt-get)
+      SED=(sudo sed)
+    else
+      echo "apt-get requires root privileges. Re-run this script with sudo, or install system dependencies manually."
+      exit 1
+    fi
+  else
+    APT_GET=(apt-get)
+    SED=(sed)
+  fi
+
   APT_OPTS=(
     -o Acquire::Retries=5
     -o Acquire::ForceIPv4=true
@@ -32,14 +45,14 @@ if command -v apt-get >/dev/null 2>&1; then
         
         if [ $mirror_attempt -eq 1 ]; then
           echo "Trying deb.debian.org mirror..."
-          sed -i 's|http://archive.ubuntu.com/ubuntu|http://deb.debian.org/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+          "${SED[@]}" -i 's|http://archive.ubuntu.com/ubuntu|http://deb.debian.org/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
         elif [ $mirror_attempt -eq 2 ]; then
           echo "Trying security.ubuntu.com mirror..."
-          sed -i 's|http://deb.debian.org/ubuntu|http://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+          "${SED[@]}" -i 's|http://deb.debian.org/ubuntu|http://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
         fi
         
-        apt-get clean >/dev/null 2>&1 || true
-        apt-get update >/dev/null 2>&1 || true
+        "${APT_GET[@]}" clean >/dev/null 2>&1 || true
+        "${APT_GET[@]}" "${APT_OPTS[@]}" update >/dev/null 2>&1 || true
       fi
       
       mirror_attempt=$((mirror_attempt + 1))
@@ -53,7 +66,8 @@ if command -v apt-get >/dev/null 2>&1; then
     return 1
   }
 
-  retry_with_mirror_fallback apt-get "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
+  retry_with_mirror_fallback "${APT_GET[@]}" "${APT_OPTS[@]}" update
+  retry_with_mirror_fallback "${APT_GET[@]}" "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
     ca-certificates \
     libegl1 \
     libgl1 \
