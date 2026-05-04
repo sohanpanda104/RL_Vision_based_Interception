@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.venv/
+rl_env/
+outputs/
+/models_3d_s2/

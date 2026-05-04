@@ -54,14 +54,18 @@ class SuccessRatePlotCallback(BaseCallback):
     Logs the eval success rate after each evaluation round
     and saves a plot to MODEL_DIR/success_rate_plot.png
     """
-    def __init__(self, save_dir, verbose=0):
+    def __init__(self, save_dir, eval_freq=None, verbose=0):
         super().__init__(verbose)
         self.save_dir = save_dir
+        self.eval_freq = eval_freq
         self.timesteps = []
         self.success_rates = []
         self.log_path = os.path.join(save_dir, "success_rate_log.json")
 
     def _on_step(self):
+        if self.eval_freq is not None and self.n_calls % self.eval_freq != 0:
+            return True
+
         # Check if there's a new eval success_rate logged
         if len(self.model.ep_info_buffer) > 0:
             infos = self.locals.get("infos", [])
@@ -302,11 +306,23 @@ def make_env(rank, seed=0):
     return _init
 
 
+def make_vec_env(env_fns):
+    if len(env_fns) == 1:
+        return DummyVecEnv(env_fns)
+    return SubprocVecEnv(env_fns)
+
+
 # ═══════════════════════════════════════════════════════════════
 # TRAINING
 # ═══════════════════════════════════════════════════════════════
 
-def train(total_timesteps=5_000_000, n_envs=8):
+def train(
+    total_timesteps=5_000_000,
+    n_envs=8,
+    eval_freq=None,
+    n_eval_episodes=30,
+    progress_bar=True,
+):
     print("\n" + "=" * 60)
     print("  STAGE 2: Domain Randomization Training")
     print("  Speed: [{:.3f}, {:.3f}]  Mass: [{:.1f}, {:.1f}]".format(
@@ -319,11 +335,11 @@ def train(total_timesteps=5_000_000, n_envs=8):
     os.makedirs(EVAL_DIR, exist_ok=True)
 
     # ─── Training Environments ───
-    train_env = SubprocVecEnv([make_env(i) for i in range(n_envs)])
+    train_env = make_vec_env([make_env(i) for i in range(n_envs)])
     train_env = VecNormalize(train_env, norm_obs=True, norm_reward=True, clip_obs=10.0)
 
     # ─── Eval Environment ───
-    eval_env = SubprocVecEnv([make_env(99)])
+    eval_env = make_vec_env([make_env(99)])
     eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=False, training=False)
 
     # ─── Callbacks ───
@@ -333,17 +349,19 @@ def train(total_timesteps=5_000_000, n_envs=8):
         name_prefix="panda_s2",
         save_vecnormalize=True,
     )
+    effective_eval_freq = eval_freq if eval_freq is not None else max(1, 25_000 // n_envs)
+
     eval_cb = EvalCallback(
         eval_env,
         best_model_save_path=os.path.join(MODEL_DIR, "best"),
         log_path=EVAL_DIR,
-        eval_freq=max(1, 25_000 // n_envs),
-        n_eval_episodes=30,       # 30 episodes = good sample across randomization
+        eval_freq=effective_eval_freq,
+        n_eval_episodes=n_eval_episodes,
         deterministic=True,
         render=False,
         verbose=1,
     )
-    plot_cb = SuccessRatePlotCallback(save_dir=MODEL_DIR)
+    plot_cb = SuccessRatePlotCallback(save_dir=MODEL_DIR, eval_freq=effective_eval_freq)
 
     # ─── Try loading Stage 1 weights for warm start ───
     s1_model_path = "models_3d_s2/panda_pick_final.zip"
@@ -378,11 +396,13 @@ def train(total_timesteps=5_000_000, n_envs=8):
     model.learn(
         total_timesteps=total_timesteps,
         callback=[ckpt_cb, eval_cb, plot_cb],
-        progress_bar=True,
+        progress_bar=progress_bar,
     )
 
     model.save(os.path.join(MODEL_DIR, "panda_s2_final"))
     train_env.save(DEFAULT_VECNORMALIZE)
+    train_env.close()
+    eval_env.close()
     print(f"\nTraining complete! Model saved to {MODEL_DIR}/")
     print(f"Success rate plot saved to {MODEL_DIR}/success_rate_plot.png")
 
@@ -473,6 +493,23 @@ def build_arg_parser():
         default=8,
         help="Number of parallel environments to launch during training.",
     )
+    train_parser.add_argument(
+        "--eval-freq",
+        type=int,
+        default=None,
+        help="Evaluate every N timesteps. Defaults to 25000 / n_envs.",
+    )
+    train_parser.add_argument(
+        "--eval-episodes",
+        type=int,
+        default=30,
+        help="Number of episodes per evaluation round.",
+    )
+    train_parser.add_argument(
+        "--no-progress-bar",
+        action="store_true",
+        help="Disable the SB3 progress bar for non-interactive runs.",
+    )
 
     eval_parser = subparsers.add_parser("eval", help="Evaluate a trained model.")
     eval_parser.add_argument(
@@ -509,4 +546,7 @@ if __name__ == "__main__":
         train(
             total_timesteps=getattr(args, "timesteps", 5_000_000),
             n_envs=getattr(args, "n_envs", 8),
+            eval_freq=getattr(args, "eval_freq", None),
+            n_eval_episodes=getattr(args, "eval_episodes", 30),
+            progress_bar=not getattr(args, "no_progress_bar", False),
         )
