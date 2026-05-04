@@ -109,3 +109,8 @@ The jump from **γ = 0.8 to 0.995** was critical for Stage 3. With 0.8, the robo
 2. [Stable-Baselines3](https://stable-baselines3.readthedocs.io/) — Raffin et al., JMLR 2021
 3. [Proximal Policy Optimization](https://arxiv.org/abs/1707.06347) — Schulman et al., 2017
 4. [PyBullet](https://pybullet.org/) — Coumans & Bai, 2016
+
+## How to run 
+1. Download run.sh
+2. Run the command **chmod +x run.sh**
+3. Then run: **./run.sh** command on the terminal
