@@ -14,21 +14,46 @@ if command -v apt-get >/dev/null 2>&1; then
     -o Acquire::http::Pipeline-Depth=0
   )
 
-  retry() {
-    n=0
-    until "$@"; do
-      n=$((n + 1))
-      if [ "$n" -ge 5 ]; then
-        return 1
+  retry_with_mirror_fallback() {
+    local mirror_attempt=1
+    local max_attempts=3
+    
+    while [ $mirror_attempt -le $max_attempts ]; do
+      echo "Mirror attempt $mirror_attempt/$max_attempts..."
+      
+      # Try to run the command (apt-get install)
+      if "$@" 2>&1 | tee /tmp/apt_output.log; then
+        return 0
       fi
-      echo "Command failed. Retrying in 10 seconds..."
-      apt-get clean >/dev/null 2>&1 || true
-      sleep 10
+      
+      # Check if libxcb-present0 is the issue
+      if grep -q "libxcb-present0" /tmp/apt_output.log 2>/dev/null || grep -q "400  Bad Request" /tmp/apt_output.log 2>/dev/null; then
+        echo "Detected libxcb-present0 mirror issue. Switching mirrors..."
+        
+        if [ $mirror_attempt -eq 1 ]; then
+          echo "Trying deb.debian.org mirror..."
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://deb.debian.org/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+        elif [ $mirror_attempt -eq 2 ]; then
+          echo "Trying security.ubuntu.com mirror..."
+          sed -i 's|http://deb.debian.org/ubuntu|http://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list 2>/dev/null || true
+        fi
+        
+        apt-get clean >/dev/null 2>&1 || true
+        apt-get update >/dev/null 2>&1 || true
+      fi
+      
+      mirror_attempt=$((mirror_attempt + 1))
+      
+      if [ $mirror_attempt -le $max_attempts ]; then
+        echo "Command failed. Switching strategy in 10 seconds..."
+        sleep 10
+      fi
     done
+    
+    return 1
   }
 
-  retry apt-get "${APT_OPTS[@]}" update
-  retry apt-get "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
+  retry_with_mirror_fallback apt-get "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
     ca-certificates \
     libegl1 \
     libgl1 \
