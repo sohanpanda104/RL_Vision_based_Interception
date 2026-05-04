@@ -7,21 +7,28 @@ cd "$ROOT_DIR"
 
 if command -v apt-get >/dev/null 2>&1; then
   export DEBIAN_FRONTEND=noninteractive
+  APT_OPTS=(
+    -o Acquire::Retries=5
+    -o Acquire::ForceIPv4=true
+    -o Acquire::http::No-Cache=true
+    -o Acquire::http::Pipeline-Depth=0
+  )
 
   retry() {
     n=0
     until "$@"; do
       n=$((n + 1))
-      if [ "$n" -ge 3 ]; then
+      if [ "$n" -ge 5 ]; then
         return 1
       fi
-      echo "Command failed. Retrying in 5 seconds..."
-      sleep 5
+      echo "Command failed. Retrying in 10 seconds..."
+      apt-get clean >/dev/null 2>&1 || true
+      sleep 10
     done
   }
 
-  retry apt-get update -o Acquire::Retries=3
-  retry apt-get install -y --no-install-recommends --fix-missing \
+  retry apt-get "${APT_OPTS[@]}" update
+  retry apt-get "${APT_OPTS[@]}" install -y --no-install-recommends --fix-missing \
     ca-certificates \
     libegl1 \
     libgl1 \
@@ -57,9 +64,12 @@ python3 -m venv .venv
 # shellcheck disable=SC1091
 source .venv/bin/activate
 
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.5.1+cpu"
-python -m pip install -r requirements.txt
+export PIP_DEFAULT_TIMEOUT="${PIP_DEFAULT_TIMEOUT:-120}"
+export PIP_RETRIES="${PIP_RETRIES:-10}"
+
+python -m pip install --upgrade --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" pip setuptools wheel
+python -m pip install --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" --index-url https://download.pytorch.org/whl/cpu "torch==2.5.1+cpu"
+python -m pip install --retries "$PIP_RETRIES" --timeout "$PIP_DEFAULT_TIMEOUT" -r requirements.txt
 
 export PYTHONUNBUFFERED=1
 export MPLBACKEND=Agg

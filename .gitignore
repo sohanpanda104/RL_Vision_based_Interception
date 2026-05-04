@@ -3,4 +3,3 @@ __pycache__/
 .venv/
 rl_env/
 outputs/
-/models_3d_s2/
