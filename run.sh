@@ -191,12 +191,28 @@ fi
     --out-dir models_3d_s2/plots
 ) | tee run_logs/stage2_plots.log
 
+(
+  if [ -f "stage3/stage3.py" ]; then
+    cd stage3
+    # Stage 3: train (default parameters in script)
+    python stage3.py
+  fi
+) | tee run_logs/stage3_train.log
+
+(
+  if [ -f "stage3/stage3.py" ]; then
+    cd stage3
+    # Stage 3: eval (uses models_3d_s3/* saved by training)
+    python stage3.py eval
+  fi
+) | tee run_logs/stage3_eval.log
+
 {
   echo "Logs:"
   find run_logs -type f | sort
   echo
   echo "Artifacts:"
-  find stage1 stage2 outputs -type f \
+  find stage1 stage2 stage3 outputs -type f \
     \( -name '*.zip' -o -name '*.pkl' -o -name '*.mp4' -o -name '*.png' -o -name '*.json' -o -name '*.npz' \) \
     | sort
 } | tee outputs/artifact_manifest.txt
