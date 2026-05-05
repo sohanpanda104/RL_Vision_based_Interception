@@ -105,10 +105,10 @@ The jump from **γ = 0.8 to 0.995** was critical for Stage 3. With 0.8, the robo
 
 ## References
 
-1. [panda-gym](https://github.com/qgallouedec/panda-gym) — Gallouédec et al., NeurIPS 2021
-2. [Stable-Baselines3](https://stable-baselines3.readthedocs.io/) — Raffin et al., JMLR 2021
-3. [Proximal Policy Optimization](https://arxiv.org/abs/1707.06347) — Schulman et al., 2017
-4. [PyBullet](https://pybullet.org/) — Coumans & Bai, 2016
+1. [panda-gym](https://github.com/qgallouedec/panda-gym) - Gallouédec et al., NeurIPS 2021
+2. [Stable-Baselines3](https://stable-baselines3.readthedocs.io/) - Raffin et al., JMLR 2021
+3. [Proximal Policy Optimization](https://arxiv.org/abs/1707.06347) - Schulman et al., 2017
+4. [PyBullet](https://pybullet.org/) - Coumans & Bai, 2016
 
 ## How to run 
 1. Download run.sh
