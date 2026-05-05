@@ -1,6 +1,6 @@
 # Precision Pick-and-Place: Learning Robotic Control through Reinforcement Learning
 
-A reinforcement learning project where a **7-DOF Franka Emika Panda** robot arm learns to track, intercept, and grasp a moving object on a conveyor belt — even when the object temporarily disappears behind a tunnel.
+A reinforcement learning project where a **7-DOF Franka Emika Panda** robot arm learns to track, intercept, and grasp a moving object on a conveyor belt - even when the object temporarily disappears behind a tunnel.
 
 Built with **PyBullet**, **panda-gym**, and **Stable-Baselines3**.
 
@@ -10,9 +10,9 @@ Built with **PyBullet**, **panda-gym**, and **Stable-Baselines3**.
 
 We train a simulated robot arm to solve a pick-and-place task that gets progressively harder across three stages:
 
-1. **Stage 1 — Constant Velocity**: The block moves at a fixed speed. The robot learns to intercept it, grasp it, and lift it to a target 20 cm above the table.
-2. **Stage 2 — Domain Randomization**: Every episode, the belt speed, object mass, and lateral drift are randomized. The robot must generalize instead of memorizing one trajectory.
-3. **Stage 3 — Occlusion Tunnel**: A 20 cm opaque tunnel hides the block mid-transit. The robot can no longer see the block and must predict where it will exit using memory (LSTM).
+1. **Stage 1 - Constant Velocity**: The block moves at a fixed speed. The robot learns to intercept it, grasp it, and lift it to a target 20 cm above the table.
+2. **Stage 2 - Domain Randomization**: Every episode, the belt speed, object mass, and lateral drift are randomized. The robot must generalize instead of memorizing one trajectory.
+3. **Stage 3 - Occlusion Tunnel**: A 20 cm opaque tunnel hides the block mid-transit. The robot can no longer see the block and must predict where it will exit using memory (LSTM).
 
 ---
 
