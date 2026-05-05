@@ -96,10 +96,10 @@ The jump from **γ = 0.8 to 0.995** was critical for Stage 3. With 0.8, the robo
 
 ## Contributors
 
-- **Anant Jain** — CSAI, Plaksha University
-- **Ramam Agarwal** — CSAI, Plaksha University
-- **Sandeep L** — CSAI, Plaksha University
-- **Sohan Panda** — RAS, Plaksha University
+- **Anant Jain** - CSAI, Plaksha University
+- **Ramam Agarwal** - CSAI, Plaksha University
+- **Sandeep L** - CSAI, Plaksha University
+- **Sohan Panda** - RAS, Plaksha University
 
 ---
 
