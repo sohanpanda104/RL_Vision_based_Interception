@@ -43,19 +43,19 @@ During occlusion (Stage 3), the block's true position is replaced with a **traje
 
 4D continuous control at each timestep:
 
-- **Δx, Δy, Δz** — end-effector velocity
-- **Gripper** — open or close
+- **Δx, Δy, Δz** - end-effector velocity
+- **Gripper** - open or close
 
 ### Reward System
 
 We use a dense reward with multiple components:
 
-- **Approach penalty** — pulls the hand toward the block
-- **Hover bonus** — rewards getting within 5 cm of the block
-- **Lift bonus** — rewards picking the block up off the table
-- **Target bonus** — pulls the lifted block toward the aerial target
-- **Success jackpot** — +100 (Stages 1 & 2) or +150 (Stage 3) for completing the task
-- **Early-catch penalty** (Stage 3 only) — penalizes catching the block before the tunnel, forcing the robot to actually use its memory
+- **Approach penalty** - pulls the hand toward the block
+- **Hover bonus** - rewards getting within 5 cm of the block
+- **Lift bonus** - rewards picking the block up off the table
+- **Target bonus** - pulls the lifted block toward the aerial target
+- **Success jackpot** - +100 (Stages 1 & 2) or +150 (Stage 3) for completing the task
+- **Early-catch penalty** (Stage 3 only) - penalizes catching the block before the tunnel, forcing the robot to actually use its memory
 
 ### Why LSTM for Stage 3?
 
