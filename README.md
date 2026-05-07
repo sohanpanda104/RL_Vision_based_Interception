@@ -11,8 +11,16 @@ Built with **PyBullet**, **panda-gym**, and **Stable-Baselines3**.
 We train a simulated robot arm to solve a pick-and-place task that gets progressively harder across three stages:
 
 1. **Stage 1 - Constant Velocity**: The block moves at a fixed speed. The robot learns to intercept it, grasp it, and lift it to a target 20 cm above the table.
+
+https://github.com/user-attachments/assets/e51ffb32-6925-44d1-a582-4eb0549a3dab
+
 2. **Stage 2 - Domain Randomization**: Every episode, the belt speed, object mass, and lateral drift are randomized. The robot must generalize instead of memorizing one trajectory.
+
+https://github.com/user-attachments/assets/54c6d1ce-d6a0-42ef-b1e9-938b82434590
+
 3. **Stage 3 - Occlusion Tunnel**: A 20 cm opaque tunnel hides the block mid-transit. The robot can no longer see the block and must predict where it will exit using memory (LSTM).
+
+https://github.com/user-attachments/assets/42c65ba5-2681-49da-99b4-b161beb6fa40
 
 ---
 
